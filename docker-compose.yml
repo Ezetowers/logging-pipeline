@@ -1,0 +1,9 @@
+publish-logs:
+  image: publish-logs
+  ports:
+    - "6060:5000"
+
+retrieve-logs:
+  image: retrieve-logs
+  ports:
+    - "6070:5000"
