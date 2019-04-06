@@ -1,10 +1,10 @@
 #!/bin/bash
 
-cd ./src/publishLogs
+cd ./src/api/publishLogs
 docker build -t publish-logs . --no-cache
 
 cd ../retrieveLogs
 docker build -t retrieve-logs . --no-cache
 
-cd ../..
+cd ../../..
 docker-compose up
