@@ -1,12 +1,9 @@
 #!/bin/bash
 
-cd ./src/api/publishLogs
-docker build -t publish-logs . --no-cache
+cd ./src
 
-cd ../retrieveLogs
-docker build -t retrieve-logs . --no-cache
-
-cd ../..
+docker build -t publish-logs -f api/publish-logs . --no-cache
+docker build -t retrieve-logs -f api/retrieve-logs . --no-cache
 docker build -t db-server -f db/Dockerfile . --no-cache
 
 cd ../

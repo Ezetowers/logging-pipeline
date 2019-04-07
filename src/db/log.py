@@ -1,7 +1,9 @@
 import multiprocessing
 import csv
+import sys
 
-from wrappers import LogRow
+sys.path.append('../')
+from common.wrappers import LogRow
 
 class Log(object):
     def __init__(self, log_file_name):

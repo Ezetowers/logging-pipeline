@@ -1,7 +1,10 @@
+import sys
+sys.path.append('../')
+
 import multiprocessing
 
-from worker_socket import WorkerSocket
 from workers import WriterWorker, ReaderWorker
+from common.worker_socket import WorkerSocket
 
 class DbHandler(object):
     def __init__(self, logs, host, port):
