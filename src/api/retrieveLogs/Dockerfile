@@ -1,4 +1,4 @@
-FROM python:3.5.7
+FROM python:3.7-alpine
 RUN pip3 install requests; pip3 install flask
 COPY get_handler.py .
 CMD ["python3", "get_handler.py"]
