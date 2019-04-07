@@ -8,7 +8,7 @@ class WriterWorker(object):
         while True:
             skt = self.queue.get(True)
             write_info = skt.receive_write_info()
-            logs[write_info.get_appId()].write_log(write_info.get_timestamp(), write_info.get_tags(), write_info.get_msg())
+            self.logs[write_info.get_appId()].write_log(write_info.get_timestamp(), write_info.get_tags(), write_info.get_msg())
             skt.send_write_confirmation()
             skt.close()
 
@@ -22,6 +22,6 @@ class ReaderWorker(object):
         while True:
             skt = self.queue.get(True)
             read_info = skt.receive_read_info()
-            logs_readed = logs[read_info.get_appId()].read_log(read_info.get_appId())
+            logs_readed = self.logs[read_info.get_appId()].read_log(read_info.get_appId())
             skt.send_read_info(logs_readed)
             skt.close()

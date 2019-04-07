@@ -1,6 +1,8 @@
 import multiprocessing
 import csv
 
+from wrappers import LogRow
+
 class Log(object):
     def __init__(self, log_file_name):
         self.lock = multiprocessing.Lock()
@@ -26,7 +28,7 @@ class Log(object):
             with open(self.log_file_name, mode='r') as log_file:
                 log_reader = csv.DictReader(log_file)
                 for row in log_reader:
-                    log = [appId, row["timestamp"], row["tags"], row["msj"]]
+                    log = LogRow(appId, row["msj"], row["tags"], row["timestamp"])
                     logs.append(log)
                 return logs
         finally:

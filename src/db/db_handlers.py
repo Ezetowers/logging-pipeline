@@ -1,6 +1,7 @@
 import multiprocessing
 
 from worker_socket import WorkerSocket
+from workers import WriterWorker, ReaderWorker
 
 class DbHandler(object):
     def __init__(self, logs, host, port):
@@ -23,3 +24,19 @@ class DbHandler(object):
         while True:
             reader_skt, addr = skt.accept()
             reading_requests.put(reader_skt)
+
+class WriterDbHandler(DbHandler):
+    def __init__(self, logs, host, port):
+        super().__init__(logs, host, port)
+
+    def _spawn_worker(self, reading_requests):
+        worker = WriterWorker(self.logs, reading_requests)
+        worker.run()
+
+class ReaderDbHandler(DbHandler):
+    def __init__(self, logs, host, port):
+        super().__init__(logs, host, port)
+
+    def _spawn_worker(self, reading_requests):
+        worker = ReaderWorker(self.logs, reading_requests)
+        worker.run()

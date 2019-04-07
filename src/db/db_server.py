@@ -1,12 +1,11 @@
 import multiprocessing
 
 from log import Log
-from reader_db_handler import ReaderDbHandler
-from writer_db_handler import WriterDbHandler
+from db_handlers import ReaderDbHandler, WriterDbHandler
 
 HOST = '127.0.0.1'
-WRITER_PORT = 6060
-READER_PORT = 6070
+WRITER_PORT = 6064
+READER_PORT = 6074
 
 def _spawn_reader(logs):
     reader = ReaderDbHandler(logs, HOST, READER_PORT)
@@ -14,12 +13,13 @@ def _spawn_reader(logs):
 
 def _spawn_writer(logs):
     writer = WriterDbHandler(logs, HOST, WRITER_PORT)
+    writer.run()
 
 def main():
-    logs = {1: Log("1_log.csv")}
+    logs = {"001": Log("1_log.csv")}
 
-    reader = multiprocessing.Process(target=_spawn_reader, args=(logs))
-    writer = multiprocessing.Process(target=_spawn_writer, args=(logs))
+    writer = multiprocessing.Process(target=_spawn_writer, args=(logs,))
+    reader = multiprocessing.Process(target=_spawn_reader, args=(logs,))
 
     reader.start()
     writer.start()

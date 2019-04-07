@@ -36,6 +36,7 @@ class WorkerSocket(StringSocket):
         super().sendall("ok")
 
     def send_read_info(self, logs):
+        super().sendall(str(len(logs)).zfill(5))
         for log in logs:
             super().sendall(log.get_appId())
             super().sendall(log.get_timestamp())
