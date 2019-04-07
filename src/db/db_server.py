@@ -4,8 +4,8 @@ from log import Log
 from db_handlers import ReaderDbHandler, WriterDbHandler
 
 HOST = '127.0.0.1'
-WRITER_PORT = 6060
-READER_PORT = 6070
+WRITER_PORT = 6061
+READER_PORT = 6071
 
 def _spawn_reader(logs):
     reader = ReaderDbHandler(logs, HOST, READER_PORT)

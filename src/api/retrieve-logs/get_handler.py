@@ -17,7 +17,7 @@ def getLog(appId):
     read_info = parser.from_json_to_read_info(json_request_info)
 
     skt = WorkerSocket()
-    skt.connect("db-server", 6070)
+    skt.connect("db-server", 6071)
 
     skt.send_read_info(read_info)
     logs_read = skt.receive_logs()

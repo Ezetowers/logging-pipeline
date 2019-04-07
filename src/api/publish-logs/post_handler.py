@@ -17,7 +17,7 @@ def postLog(appId):
     log = parser.from_json_to_log(json_request_log)
 
     skt = WorkerSocket()
-    skt.connect("db-server", 6060)
+    skt.connect("db-server", 6061)
 
     skt.send_log_info(log)
 

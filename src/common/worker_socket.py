@@ -3,6 +3,8 @@ from .wrappers import LogRow, ReadInfo
 
 STATIC_FIELD_SIZE = 3
 TIMESTAMP_FIELD_SIZE = 5
+LOGS_NUMBER_FIELD_SIZE = 5
+WRITE_STATUS_FIELD_SIZE = 2
 
 '''A worker socket aware of the difficult lifes of the employees'''
 class WorkerSocket(StringSocket):
@@ -42,17 +44,17 @@ class WorkerSocket(StringSocket):
         super().sendall(log.get_appId())
         super().sendall(log.get_timestamp())
         super().send_with_size(log.get_msg())
-        super().send_with_size(log.get_tasg())
+        super().send_with_size(log.get_tags())
 
     def send_logs_info(self, logs):
-        super().sendall(str(len(logs)).zfill(5))
+        super().sendall(str(len(logs)).zfill(LOGS_NUMBER_FIELD_SIZE))
         for log in logs:
             self.send_log_info(log)
 
     def receive_logs(self):
         logs = []
 
-        size = int(super().receiveall(5))
+        size = int(super().receiveall(LOGS_NUMBER_FIELD_SIZE))
         for x in range(size):
             appId = super().receiveall(STATIC_FIELD_SIZE)
             timestamp = super().receiveall(TIMESTAMP_FIELD_SIZE)
@@ -64,4 +66,4 @@ class WorkerSocket(StringSocket):
         return logs
 
     def receive_write_status(self):
-        return super().receiveall(2)
+        return super().receiveall(WRITE_STATUS_FIELD_SIZE)

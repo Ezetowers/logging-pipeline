@@ -23,5 +23,5 @@ class ReaderWorker(object):
             skt = self.queue.get(True)
             read_info = skt.receive_read_info()
             logs_readed = self.logs[read_info.get_appId()].read_log(read_info.get_appId())
-            skt.send_read_info(logs_readed)
+            skt.send_logs_info(logs_readed)
             skt.close()
