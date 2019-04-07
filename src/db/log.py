@@ -1,9 +1,9 @@
-import threading
+import multiprocessing
 import csv
 
 class Log(object):
     def __init__(self, log_file_name):
-        self.lock = threading.Lock()
+        self.lock = multiprocessing.Lock()
         self.log_file_name = log_file_name
 
     def write_log(self, timestamp, tags, msj):
