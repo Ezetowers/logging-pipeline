@@ -13,7 +13,7 @@ app = Flask(__name__)
 
 @app.route("/log/<appId>", methods = ['POST'])
 def postLog(appId):
-    json_request_log = request.args
+    json_request_log = request.get_json()
     log = parser.from_json_to_log(json_request_log)
 
     skt = WorkerSocket()

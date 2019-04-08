@@ -24,10 +24,12 @@ class Log(object):
             self.lock.release()
 
     def read_log(self, appId):
+        print("----------------------------Espero para leer------------------------------")
         self.lock.acquire()
         try:
             logs = []
             with open(self.log_file_name, mode='r') as log_file:
+                print("---------------------------Leyendo-------------------------------")
                 log_reader = csv.DictReader(log_file)
                 for row in log_reader:
                     log = LogRow(appId, row["msj"], row["tags"], row["timestamp"])

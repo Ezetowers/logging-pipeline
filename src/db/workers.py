@@ -7,6 +7,7 @@ class WriterWorker(object):
     def run(self):
         while True:
             skt = self.queue.get(True)
+            print("----------------------Obtuve algo------------------------------------")
             write_info = skt.receive_write_info()
             self.logs[write_info.get_appId()].write_log(write_info.get_timestamp(), write_info.get_tags(), write_info.get_msg())
             skt.send_write_confirmation()

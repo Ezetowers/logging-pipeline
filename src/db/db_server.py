@@ -3,7 +3,7 @@ import multiprocessing
 from log import Log
 from db_handlers import ReaderDbHandler, WriterDbHandler
 
-HOST = '127.0.0.1'
+HOST = '0.0.0.0'
 WRITER_PORT = 6061
 READER_PORT = 6071
 

@@ -26,6 +26,7 @@ class DbHandler(object):
 
         while True:
             reader_skt, addr = skt.accept()
+            print("------------------------Acepte a un gil----------------------------------")
             reading_requests.put(reader_skt)
 
 class WriterDbHandler(DbHandler):
