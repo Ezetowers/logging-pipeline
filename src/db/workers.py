@@ -22,6 +22,11 @@ class ReaderWorker(object):
         while True:
             skt = self.queue.get(True)
             read_info = skt.receive_read_info()
+
+            if (not self.logs.get(read_info.get_appId)):
+                skt.send_logs([])
+                continue
+
             logs_readed = self.logs[read_info.get_appId()].read_log(read_info.get_appId())
             skt.send_logs(logs_readed)
             skt.close()

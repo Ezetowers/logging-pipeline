@@ -8,6 +8,7 @@ from common.worker_socket import WorkerSocket
 
 sys.path.append('../')
 import common.parser as parser
+import common.response_sender as response_sender
 
 DB_SERVER_READ_PORT = 6071
 
@@ -19,7 +20,12 @@ def getLog(appId):
     read_info = parser.from_json_to_read_info(json_request_info, appId)
 
     skt = WorkerSocket()
-    skt.connect("db-server", DB_SERVER_READ_PORT)
+    try:
+        skt.connect("db-server", DB_SERVER_READ_PORT)
+    except socket_error as serr:
+        if serr.errno == errno.ECONNREFUSED:
+            return response_sender.send_response(app, 503, "Error, our servers are full, try later")
+
     skt.send_read_info(read_info)
     logs_read = skt.receive_logs()
 
