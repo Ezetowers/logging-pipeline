@@ -1,6 +1,6 @@
-import multiprocessing
+import threading
 
-from log import Log
+from log_manager import LogManager
 from db_handlers import ReaderDbHandler, WriterDbHandler
 
 HOST = '0.0.0.0'
@@ -16,13 +16,16 @@ def _spawn_writer(logs):
     writer.run()
 
 def main():
-    logs = {"001": Log("1_log.csv")}
+    logs = LogManager()
 
-    writer = multiprocessing.Process(target=_spawn_writer, args=(logs,))
-    reader = multiprocessing.Process(target=_spawn_reader, args=(logs,))
+    writer = threading.Thread(target=_spawn_writer, args=(logs,))
+    reader = threading.Thread(target=_spawn_reader, args=(logs,))
 
     reader.start()
     writer.start()
+
+    reader.join()
+    writer.join()
 
 if __name__ == '__main__':
     main()

@@ -1,7 +1,10 @@
 import sys
 sys.path.append('../')
 
-import multiprocessing
+import threading
+import queue
+
+NUM_THREADS = 2
 
 from workers import WriterWorker, ReaderWorker
 from common.worker_socket import WorkerSocket
@@ -13,27 +16,30 @@ class DbHandler(object):
         self.port = port
 
     def _spawn_worker(self, reading_requests):
-        raise NotImplementedError("abstract method!")
+        raise NotImplementedError("Abstract method!")
 
     def run(self):
-        reading_requests = multiprocessing.Queue()
+        requests = queue.Queue()
 
         skt = WorkerSocket()
         skt.bind(self.host, self.port)
         skt.listen()
 
-        readers_pool = multiprocessing.Pool(2, self._spawn_worker, (reading_requests,))
+        for i in range(NUM_THREADS):
+            worker = threading.Thread(target=self._spawn_worker, args=(requests,))
+            worker.setDaemon(True)
+            worker.start()
 
         while True:
-            reader_skt, addr = skt.accept()
-            reading_requests.put(reader_skt)
+            request_skt, addr = skt.accept()
+            requests.put(request_skt)
 
 class WriterDbHandler(DbHandler):
     def __init__(self, logs, host, port):
         super().__init__(logs, host, port)
 
-    def _spawn_worker(self, reading_requests):
-        worker = WriterWorker(self.logs, reading_requests)
+    def _spawn_worker(self, writing_requests):
+        worker = WriterWorker(self.logs, writing_requests)
         worker.run()
 
 class ReaderDbHandler(DbHandler):
