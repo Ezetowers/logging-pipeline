@@ -23,6 +23,8 @@ def postLog(appId):
 
     status = skt.receive_write_status()
 
+    skt.close()
+
     return app.response_class(
         response=status,
         status=200,

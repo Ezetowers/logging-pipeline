@@ -20,8 +20,8 @@ class LogRow(object):
 class ReadInfo(object):
     def __init__(self, appId, from_time, to_time, tags):
         self.appId = appId
-        self.from_time = from_time if from_time else " "
-        self.to_time = to_time if to_time else " "
+        self.from_time = from_time if from_time else "     "
+        self.to_time = to_time if to_time else "     "
         self.tags = tags if tags else " "
 
     def get_tags(self):
