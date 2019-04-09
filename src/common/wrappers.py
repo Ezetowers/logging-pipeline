@@ -1,4 +1,4 @@
-EMPTY_TIMESTAMP = "     "
+EMPTY_TIMESTAMP = "                          "
 EMPTY_TAGS = " "
 EMPTY_PATTERN = " "
 

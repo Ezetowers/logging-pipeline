@@ -2,7 +2,7 @@ from .string_socket import StringSocket
 from .wrappers import LogEntry, ReadInfo
 
 STATIC_FIELD_SIZE = 3
-TIMESTAMP_FIELD_SIZE = 5
+TIMESTAMP_FIELD_SIZE = 26 #YYYY-MM-DD HH:MM:SS.SSSSSS
 LOGS_NUMBER_FIELD_SIZE = 5
 WRITE_STATUS_FIELD_SIZE = 2
 

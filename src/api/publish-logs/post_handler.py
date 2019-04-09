@@ -19,21 +19,27 @@ def postLog(appId):
     json_request_log = request.get_json()
     log = parser.from_json_to_log(appId, json_request_log)
 
+    print("---------------------------Recibo el post----------------------------------")
+
     if (not validator.is_log_valid(log)):
         return response_sender.send_response(app, 503, "Error, missing atributes")
 
     skt = WorkerSocket()
 
+    print("---------------------------Me estoy por conectar----------------------------------")
     try:
         skt.connect("db-server", DB_SERVER_WRITE_PORT)
     except socket_error as serr:
         if serr.errno == errno.ECONNREFUSED:
             return response_sender.send_response(app, 503, "Error, our servers are full, try later")
 
+    print("---------------------------Me conecte----------------------------------")
     skt.send_log(log)
 
+    print("---------------------------Envie la info para el post----------------------------------")
     status = skt.receive_write_status()
 
+    print("---------------------------Recibo la info del post al db----------------------------------")
     skt.close()
 
     return response_sender.send_response(app, 200, status)
