@@ -1,4 +1,8 @@
-class LogRow(object):
+EMPTY_TIMESTAMP = "     "
+EMPTY_TAGS = " "
+EMPTY_PATTERN = " "
+
+class LogEntry(object):
     def __init__(self, appId, msg, tags, timestamp):
         self.appId = appId
         self.msg = msg
@@ -18,11 +22,12 @@ class LogRow(object):
         return self.msg
 
 class ReadInfo(object):
-    def __init__(self, appId, from_time, to_time, tags):
+    def __init__(self, appId, from_time, to_time, tags, pattern):
         self.appId = appId
-        self.from_time = from_time if from_time else "     "
-        self.to_time = to_time if to_time else "     "
-        self.tags = tags if tags else " "
+        self.from_time = from_time if from_time else EMPTY_TIMESTAMP
+        self.to_time = to_time if to_time else EMPTY_TIMESTAMP
+        self.tags = tags if tags else EMPTY_TAGS
+        self.pattern = pattern if pattern else EMPTY_PATTERN
 
     def get_tags(self):
         return self.tags
@@ -35,3 +40,6 @@ class ReadInfo(object):
 
     def get_from(self):
         return self.from_time
+
+    def get_pattern(self):
+        return self.pattern

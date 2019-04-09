@@ -9,6 +9,8 @@ from common.worker_socket import WorkerSocket
 sys.path.append('../')
 import common.parser as parser
 
+DB_SERVER_WRITE_PORT = 6061
+
 app = Flask(__name__)
 
 @app.route("/log/<appId>", methods = ['POST'])
@@ -17,16 +19,16 @@ def postLog(appId):
     log = parser.from_json_to_log(json_request_log)
 
     skt = WorkerSocket()
-    skt.connect("db-server", 6061)
+    skt.connect("db-server", DB_SERVER_WRITE_PORT)
 
-    skt.send_log_info(log)
+    skt.send_log(log)
 
     status = skt.receive_write_status()
 
     skt.close()
 
     return app.response_class(
-        response=status,
+        response=json.dumps({"status": status}),
         status=200,
         mimetype='application/json')
 

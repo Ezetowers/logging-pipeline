@@ -3,7 +3,11 @@ import csv
 import sys
 
 sys.path.append('../')
-from common.wrappers import LogRow
+from common.wrappers import LogEntry
+
+TIMESTAMP_COL = "timestamp"
+TAGS_COL = "field"
+MSG_COL = "msj"
 
 class Log(object):
     def __init__(self, log_file_name):
@@ -17,22 +21,20 @@ class Log(object):
                 log_writer = csv.writer(log_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
                 if (not log_file.tell()):
-                    log_writer.writerow(["timestamp", "tags", "msj"])
+                    log_writer.writerow([TIMESTAMP_COL, TAGS_COL, MSG_COL])
 
                 log_writer.writerow([timestamp, tags, msj])
         finally:
             self.lock.release()
 
     def read_log(self, appId):
-        print("----------------------------Espero para leer------------------------------")
         self.lock.acquire()
         try:
             logs = []
             with open(self.log_file_name, mode='r') as log_file:
-                print("---------------------------Leyendo-------------------------------")
                 log_reader = csv.DictReader(log_file)
                 for row in log_reader:
-                    log = LogRow(appId, row["msj"], row["tags"], row["timestamp"])
+                    log = LogEntry(appId, row[MSG_COL], row[TAGS_COL], row[TIMESTAMP_COL])
                     logs.append(log)
                 return logs
         finally:

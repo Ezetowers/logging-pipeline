@@ -1,5 +1,5 @@
 from .string_socket import StringSocket
-from .wrappers import LogRow, ReadInfo
+from .wrappers import LogEntry, ReadInfo
 
 STATIC_FIELD_SIZE = 3
 TIMESTAMP_FIELD_SIZE = 5
@@ -21,35 +21,37 @@ class WorkerSocket(StringSocket):
         msg = super().receive_with_size(STATIC_FIELD_SIZE)
         tags = super().receive_with_size(STATIC_FIELD_SIZE)
 
-        return LogRow(appId, msg, tags, timestamp)
+        return LogEntry(appId, msg, tags, timestamp)
 
     def receive_read_info(self):
         appId = super().receiveall(STATIC_FIELD_SIZE)
         from_time = super().receiveall(TIMESTAMP_FIELD_SIZE)
         to_time = super().receiveall(TIMESTAMP_FIELD_SIZE)
         tags = super().receive_with_size(STATIC_FIELD_SIZE)
+        pattern = super().receive_with_size(STATIC_FIELD_SIZE)
 
-        return ReadInfo(appId, from_time, to_time, tags)
+        return ReadInfo(appId, from_time, to_time, tags, pattern)
 
     def send_read_info(self, read_info):
         super().sendall(read_info.get_appId())
         super().sendall(read_info.get_from())
         super().sendall(read_info.get_to())
         super().send_with_size(read_info.get_tags())
+        super().send_with_size(read_info.get_pattern())
 
     def send_write_confirmation(self):
         super().sendall("ok")
 
-    def send_log_info(self, log):
+    def send_log(self, log):
         super().sendall(log.get_appId())
         super().sendall(log.get_timestamp())
         super().send_with_size(log.get_msg())
         super().send_with_size(log.get_tags())
 
-    def send_logs_info(self, logs):
+    def send_logs(self, logs):
         super().sendall(str(len(logs)).zfill(LOGS_NUMBER_FIELD_SIZE))
         for log in logs:
-            self.send_log_info(log)
+            self.send_log(log)
 
     def receive_logs(self):
         logs = []
@@ -61,7 +63,7 @@ class WorkerSocket(StringSocket):
             msg = super().receive_with_size(STATIC_FIELD_SIZE)
             tags = super().receive_with_size(STATIC_FIELD_SIZE)
 
-            logs.append(LogRow(appId, msg, tags, timestamp))
+            logs.append(LogEntry(appId, msg, tags, timestamp))
 
         return logs
 

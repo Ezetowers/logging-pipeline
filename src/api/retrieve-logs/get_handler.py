@@ -9,6 +9,8 @@ from common.worker_socket import WorkerSocket
 sys.path.append('../')
 import common.parser as parser
 
+DB_SERVER_READ_PORT = 6071
+
 app = Flask(__name__)
 
 @app.route("/log/<appId>")
@@ -17,7 +19,7 @@ def getLog(appId):
     read_info = parser.from_json_to_read_info(json_request_info, appId)
 
     skt = WorkerSocket()
-    skt.connect("db-server", 6071)
+    skt.connect("db-server", DB_SERVER_READ_PORT)
     skt.send_read_info(read_info)
     logs_read = skt.receive_logs()
 
