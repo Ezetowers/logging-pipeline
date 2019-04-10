@@ -50,11 +50,14 @@ class LogManager(object):
         self.lock.acquire()
         try:
             logs_from_timestamp = []
-            logs = self.logs.get(appId, [])
+            logs = self.logs.get(appId, {})
 
-            for timestamp, log in logs:
-                if parser.get_day_from_timestamp(timestamp) >= parser.get_day_from_timestamp(from_timestamp):
-                    logs_from_timestamp.append(log)
+            print(self.logs)
+            print(self.logs.get(appId, {}))
+
+            for timestamp in logs:
+                if timestamp >= parser.get_day_from_timestamp(from_timestamp):
+                    logs_from_timestamp.append(logs[timestamp])
 
             return logs_from_timestamp
         finally:
@@ -67,7 +70,7 @@ class LogManager(object):
             logs = self.logs.get(appId, [])
 
             for timestamp, log in logs:
-                if parser.get_day_from_timestamp(timestamp) <= parser.get_day_from_timestamp(from_timestamp):
+                if timestamp <= parser.get_day_from_timestamp(to_timestamp):
                     logs_from_timestamp.append(log)
 
             return logs_to_timestamp

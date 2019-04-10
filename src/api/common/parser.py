@@ -6,6 +6,9 @@ import json
 from common.wrappers import ReadInfo, LogEntry
 
 def from_json_to_read_info(json, appId):
+    print("------------Me llego---------------", sys.stderr)
+    print((appId, json.get('from'), json.get('to'), json.get('tags'), json.get('pattern')), sys.stderr)
+    print("-----------------------------------", sys.stderr)
     return ReadInfo(appId, json.get('from'), json.get('to'), json.get('tags'), json.get('pattern'))
 
 def from_json_to_log(appId, json):
