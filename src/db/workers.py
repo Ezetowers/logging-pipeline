@@ -1,14 +1,19 @@
 import threading
 
+'''A thread that gets connected sockets from a queue and writes to a log
+regarding the information received'''
 class WriterWorker(threading.Thread):
     def __init__(self, logs, queue):
-        '''logs is a dictionario of Log objects and skt a socket'''
+        '''Initializer for the WriterWorker, it receives a LogFileManager
+        and a blocking Queue'''
         threading.Thread.__init__(self)
         self.logs = logs
         self.queue = queue
         self.keep_running = True
 
     def run(self):
+        '''Run function, it gets connected sockets from its queue and then
+        writes the requested information'''
         while self.keep_running:
             skt = self.queue.get(True)
             write_info = skt.receive_write_info()
@@ -22,18 +27,23 @@ class WriterWorker(threading.Thread):
             skt.close()
 
     def stop(self):
+        '''Tells the worker to stop its execution'''
         self.keep_running = False
 
-
+'''A thread that gets connected sockets from a queue and reads from a log
+regarding the information received'''
 class ReaderWorker(threading.Thread):
     def __init__(self, logs, queue):
-        '''logs is a dictionario of Log objects and skt a socket'''
+        '''Initializer for the ReaderWorker, it receives a LogFileManager
+        and a blocking Queue'''
         threading.Thread.__init__(self)
         self.logs = logs
         self.queue = queue
         self.keep_running = True
 
     def run(self):
+        '''Run function, it gets connected sockets from its queue and then
+        sends the readed requested information'''
         while self.keep_running:
             skt = self.queue.get(True)
             read_info = skt.receive_read_info()
@@ -48,5 +58,5 @@ class ReaderWorker(threading.Thread):
             skt.close()
 
     def stop(self):
-        print("cambie el valor del self.run")
+        '''Tells the worker to stop its execution'''
         self.keep_running = False

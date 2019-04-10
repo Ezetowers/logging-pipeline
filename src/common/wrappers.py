@@ -2,6 +2,7 @@ EMPTY_TIMESTAMP = "                          "
 EMPTY_TAGS = " "
 EMPTY_PATTERN = " "
 
+'''A wrapper for a log entry, just with getters'''
 class LogEntry(object):
     def __init__(self, appId, msg, tags, timestamp):
         self.appId = appId
@@ -21,6 +22,7 @@ class LogEntry(object):
     def get_msg(self):
         return self.msg
 
+'''A wrapper for the information needed to read a log, just with getters'''
 class ReadInfo(object):
     def __init__(self, appId, from_time, to_time, tags, pattern):
         self.appId = appId

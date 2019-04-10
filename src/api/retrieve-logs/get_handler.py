@@ -1,3 +1,5 @@
+#Entry point of the RETRIEVE feature of the logging pipeline
+
 import sys
 
 from flask import Flask, request

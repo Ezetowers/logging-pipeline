@@ -1,3 +1,5 @@
+# Entry point for the PUBLISH feature of the logging pipeline.
+
 import sys
 
 from flask import Flask, request

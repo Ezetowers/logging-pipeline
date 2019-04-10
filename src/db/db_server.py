@@ -1,3 +1,5 @@
+#Entry point for the database server of the logging pipeline
+
 import threading
 
 from log_file_manager import LogFileManager

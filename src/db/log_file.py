@@ -13,12 +13,15 @@ MSJ_COL = "msj"
 EMPTY_TIMESTAMP = "                          "
 EMPTY_TAGS = " "
 
+'''Class that implements safe writes and reads for a file'''
 class LogFile(object):
     def __init__(self, log_file_name):
+        '''Initializer for the LogFile, it takes a name for its file'''
         self.lock = threading.Lock()
         self.log_file_name = log_file_name
 
     def write_log(self, timestamp, tags, msj):
+        '''Writes a log to its file'''
         self.lock.acquire()
         try:
             with open(self.log_file_name, mode='a') as log_file:
@@ -32,6 +35,8 @@ class LogFile(object):
             self.lock.release()
 
     def read_log(self, appId, from_timestamp, to_timestamp, tag):
+        '''Returns the all the LogEntry objects of id appId, that are between
+        from_timestamp date to to_timestamp date and have the given tag'''
         self.lock.acquire()
         try:
             logs = []

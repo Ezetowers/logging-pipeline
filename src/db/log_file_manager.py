@@ -6,19 +6,27 @@ import parser
 EMPTY_TIMESTAMP = "                          "
 EMPTY_TAGS = " "
 
+'''A manager for a collection of LogFile objects'''
 class LogFileManager(object):
     def __init__(self):
+        '''Initializer for a LogFileManager'''
         self.lock = threading.Lock()
         self.log_files = {}
 
     def has_log_file_for_timestamp(self, appId, timestamp):
+        '''Returns true if the LogFileManager has a LogFile for the given
+        timestamp and appId'''
         day = parser.get_day_from_timestamp(timestamp)
         return (appId in self.log_files) and (day in self.log_files[appId]["days"])
 
     def has_log_file_for_tag(self, appId, tag):
+        '''Returns true if the LogFileManager has a LogFile for the given
+        tag and appId'''
         return (appId in self.log_files) and (tag in self.log_files[appId]["tags"])
 
     def get_or_create_log_file_for_timestamp(self, appId, timestamp):
+        '''Gets the LogFile for a given timestamp and appId, if there is no one,
+        one is created and then returned'''
         self.lock.acquire()
         try:
             if not self.has_log_file_for_timestamp(appId, timestamp):
@@ -37,6 +45,8 @@ class LogFileManager(object):
         return self.log_files.get(appId).get("days").get(parser.get_day_from_timestamp(timestamp))
 
     def get_or_create_log_file_for_tags(self, appId, tags):
+        '''Gets the LogFiles for a given set of tags and appId, if there is no
+        one for at least one of them, they are created and then returned'''
         self.lock.acquire()
         try:
             log_files = []
@@ -57,6 +67,8 @@ class LogFileManager(object):
         return self.log_files.get(appId).get("tags").get(tag)
 
     def get_log_files(self, appId, from_timestamp, to_timestamp, tag):
+        '''Gets all the LogFiles for a given appId, a set of tags and between
+        a range of timestamps'''
         if (from_timestamp == EMPTY_TIMESTAMP and to_timestamp == EMPTY_TIMESTAMP):
             if (tag != EMPTY_TAGS):
                 return self._get_log_files_for_tag(appId, tag)
@@ -68,7 +80,6 @@ class LogFileManager(object):
         if (to_timestamp == EMPTY_TIMESTAMP):
             return self._get_log_files_from_timestamp(appId, from_timestamp)
 
-        print("---------------Obtengo todos los timestamps entre: {} y {}-----------------".format(from_timestamp, to_timestamp))
         return self._get_log_files_between_range(appId, from_timestamp, to_timestamp)
 
     def _get_log_files_for_tag(self, appId, tag):
