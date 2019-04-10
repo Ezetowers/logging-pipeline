@@ -11,6 +11,7 @@ TIMESTAMP_COL = "timestamp"
 TAGS_COL = "field"
 MSJ_COL = "msj"
 EMPTY_TIMESTAMP = "                          "
+EMPTY_TAGS = " "
 
 class LogFile(object):
     def __init__(self, log_file_name):
@@ -30,7 +31,7 @@ class LogFile(object):
         finally:
             self.lock.release()
 
-    def read_log(self, appId, from_timestamp, to_timestamp):
+    def read_log(self, appId, from_timestamp, to_timestamp, tag):
         self.lock.acquire()
         try:
             logs = []
@@ -39,11 +40,15 @@ class LogFile(object):
                 for row in log_reader:
                     log = LogEntry(appId, row[MSJ_COL], row[TAGS_COL], row[TIMESTAMP_COL])
                     log_timestamp = parser.get_datetime_from_timestamp(log.get_timestamp())
+                    log_tags = log.get_tags().split(" ")
 
                     if (from_timestamp != EMPTY_TIMESTAMP and log_timestamp < parser.get_datetime_from_timestamp(from_timestamp)):
                         continue
 
                     if (to_timestamp != EMPTY_TIMESTAMP and log_timestamp > parser.get_datetime_from_timestamp(to_timestamp)):
+                        continue
+
+                    if (tag != EMPTY_TAGS and tag not in log_tags):
                         continue
 
                     logs.append(log)

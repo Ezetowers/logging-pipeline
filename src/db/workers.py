@@ -10,7 +10,12 @@ class WriterWorker(object):
             print("---------------------------Agarre un pedido----------------------------------")
             write_info = skt.receive_write_info()
             print("---------------------------Recibo la info del pedido----------------------------------")
-            self.logs.get_or_create_log_file(write_info.get_appId(), write_info.get_timestamp()).write_log(write_info.get_timestamp(), write_info.get_tags(), write_info.get_msg())
+            self.logs.get_or_create_log_file_for_timestamp(write_info.get_appId(), write_info.get_timestamp()).write_log(write_info.get_timestamp(), write_info.get_tags(), write_info.get_msg())
+
+            logs_for_tags = self.logs.get_or_create_log_file_for_tags(write_info.get_appId(), write_info.get_tags())
+            for log in logs_for_tags:
+                log.write_log(write_info.get_timestamp(), write_info.get_tags(), write_info.get_msg())
+
             print("---------------------------La escribi----------------------------------")
             skt.send_write_confirmation()
             print("---------------------------Envio la info de la escritura----------------------------------")
@@ -29,13 +34,13 @@ class ReaderWorker(object):
             read_info = skt.receive_read_info()
             print("---------------------------Lei la info del pedido----------------------------------")
 
-            logs_to_read = self.logs.get_log_files(read_info.get_appId(), read_info.get_from(), read_info.get_to())
+            logs_to_read = self.logs.get_log_files(read_info.get_appId(), read_info.get_from(), read_info.get_to(), read_info.get_tags())
 
             print("---------------------------Obtengo los logs a leer----------------------------------")
 
             logs_readed = []
             for log_to_read in logs_to_read:
-                logs_readed += log_to_read.read_log(read_info.get_appId(), read_info.get_from(), read_info.get_to())
+                logs_readed += log_to_read.read_log(read_info.get_appId(), read_info.get_from(), read_info.get_to(), read_info.get_tags())
             print("---------------------------Lei los logs----------------------------------")
             skt.send_logs(logs_readed)
             print("---------------------------Envie los logs leidos----------------------------------")
