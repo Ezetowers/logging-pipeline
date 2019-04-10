@@ -1,5 +1,5 @@
 #Entry point for the database server of the logging pipeline
-
+import os
 import threading
 
 from log_file_manager import LogFileManager
@@ -10,10 +10,11 @@ WRITER_PORT = 6061
 READER_PORT = 6071
 
 def main():
+    number_of_threads = int(os.environ['NUMBER_OF_THREADS'])
     logs = LogFileManager()
 
-    writer = WriterDbHandler(logs, HOST, WRITER_PORT)
-    reader = ReaderDbHandler(logs, HOST, READER_PORT)
+    writer = WriterDbHandler(logs, number_of_threads, HOST, WRITER_PORT)
+    reader = ReaderDbHandler(logs, number_of_threads, HOST, READER_PORT)
 
     reader.start()
     writer.start()

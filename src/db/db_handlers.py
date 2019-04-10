@@ -5,15 +5,13 @@ import errno
 import threading
 import queue
 
-NUM_THREADS = 2
-
 from workers import WriterWorker, ReaderWorker
 from common.worker_socket import WorkerSocket
 
 '''A base database handler that receives incomming connections and spawns
 threads for processing them'''
 class DbHandler(threading.Thread):
-    def __init__(self, logs, host, port):
+    def __init__(self, logs, number_of_threads, host, port):
         '''Initializer for the DbHandler object, it takes a LogFileManager,
         a host and a port to listen to'''
         threading.Thread.__init__(self)
@@ -22,6 +20,7 @@ class DbHandler(threading.Thread):
         self.port = port
         self.skt = WorkerSocket()
         self.keep_running = True
+        self.number_of_threads = number_of_threads
 
     def _spawn_worker(self, reading_requests):
         '''Returns a thread to use everytime a connections is accepted'''
@@ -37,7 +36,7 @@ class DbHandler(threading.Thread):
 
         workers = []
 
-        for i in range(NUM_THREADS):
+        for i in range(self.number_of_threads):
             worker = self._spawn_worker(requests)
             worker.setDaemon(True)
             worker.start()
@@ -67,16 +66,16 @@ class DbHandler(threading.Thread):
 
 '''A DbHandler that spawns WriterWorker threads'''
 class WriterDbHandler(DbHandler):
-    def __init__(self, logs, host, port):
-        super().__init__(logs, host, port)
+    def __init__(self, logs, number_of_threads, host, port):
+        super().__init__(logs, number_of_threads, host, port)
 
     def _spawn_worker(self, writing_requests):
         return WriterWorker(self.logs, writing_requests)
 
 '''A DbHandler that spawns ReaderWorker threads'''
 class ReaderDbHandler(DbHandler):
-    def __init__(self, logs, host, port):
-        super().__init__(logs, host, port)
+    def __init__(self, logs, number_of_threads, host, port):
+        super().__init__(logs, number_of_threads, host, port)
 
     def _spawn_worker(self, reading_requests):
         return ReaderWorker(self.logs, reading_requests)
