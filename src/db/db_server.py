@@ -4,8 +4,8 @@ from log_file_manager import LogFileManager
 from db_handlers import ReaderDbHandler, WriterDbHandler
 
 HOST = '0.0.0.0'
-WRITER_PORT = 6069
-READER_PORT = 6079
+WRITER_PORT = 6061
+READER_PORT = 6071
 
 def main():
     logs = LogFileManager()
