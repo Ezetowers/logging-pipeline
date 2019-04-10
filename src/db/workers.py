@@ -35,7 +35,7 @@ class ReaderWorker(object):
 
             logs_readed = []
             for log_to_read in logs_to_read:
-                logs_readed += log_to_read.read_log(read_info.get_appId())
+                logs_readed += log_to_read.read_log(read_info.get_appId(), read_info.get_from(), read_info.get_to())
             print("---------------------------Lei los logs----------------------------------")
             skt.send_logs(logs_readed)
             print("---------------------------Envie los logs leidos----------------------------------")

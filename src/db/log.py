@@ -2,12 +2,15 @@ import threading
 import csv
 import sys
 
+import parser
+
 sys.path.append('../')
 from common.wrappers import LogEntry
 
 TIMESTAMP_COL = "timestamp"
 TAGS_COL = "field"
-MSG_COL = "msj"
+MSJ_COL = "msj"
+EMPTY_TIMESTAMP = "                          "
 
 class Log(object):
     def __init__(self, log_file_name):
@@ -21,21 +24,30 @@ class Log(object):
                 log_writer = csv.writer(log_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
                 if (not log_file.tell()):
-                    log_writer.writerow([TIMESTAMP_COL, TAGS_COL, MSG_COL])
+                    log_writer.writerow([TIMESTAMP_COL, TAGS_COL, MSJ_COL])
 
                 log_writer.writerow([timestamp, tags, msj])
         finally:
             self.lock.release()
 
-    def read_log(self, appId):
+    def read_log(self, appId, from_timestamp, to_timestamp):
         self.lock.acquire()
         try:
             logs = []
             with open(self.log_file_name, mode='r') as log_file:
                 log_reader = csv.DictReader(log_file)
                 for row in log_reader:
-                    log = LogEntry(appId, row[MSG_COL], row[TAGS_COL], row[TIMESTAMP_COL])
+                    log = LogEntry(appId, row[MSJ_COL], row[TAGS_COL], row[TIMESTAMP_COL])
+                    log_timestamp = parser.get_datetime_from_timestamp(log.get_timestamp())
+
+                    if (from_timestamp != EMPTY_TIMESTAMP and log_timestamp < parser.get_datetime_from_timestamp(from_timestamp)):
+                        continue
+
+                    if (to_timestamp != EMPTY_TIMESTAMP and log_timestamp > parser.get_datetime_from_timestamp(to_timestamp)):
+                        continue
+
                     logs.append(log)
+                    
                 return logs
         finally:
             self.lock.release()
