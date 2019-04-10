@@ -43,7 +43,7 @@ class WorkerSocket(StringSocket):
         print("----------From time: {}-----------".format(read_info.get_from()), sys.stderr)
         print("----------To time: {}-----------".format(read_info.get_to()), sys.stderr)
         super().sendall(read_info.get_appId())
-        super().sendall("1994-02-02 09:30:20.120000")
+        super().sendall(read_info.get_from())
         super().sendall(read_info.get_to())
         super().send_with_size(read_info.get_tags())
         super().send_with_size(read_info.get_pattern())

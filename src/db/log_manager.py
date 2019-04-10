@@ -14,7 +14,7 @@ class LogManager(object):
         day = parser.get_day_from_timestamp(timestamp)
         return (appId in self.logs) and (day in self.logs[appId])
 
-    def _add_log(self, appId, timestamp):
+    def _add_log_file(self, appId, timestamp):
         day = parser.get_day_from_timestamp(timestamp)
         if (not appId in self.logs):
             self.logs[appId] = {}
@@ -27,7 +27,7 @@ class LogManager(object):
         self.lock.acquire()
         try:
             if not self.has_log(appId, timestamp):
-                self._add_log(appId, timestamp)
+                self._add_log_file(appId, timestamp)
             return self._get_log(appId, timestamp)
         finally:
             self.lock.release()
@@ -67,11 +67,11 @@ class LogManager(object):
         self.lock.acquire()
         try:
             logs_to_timestamp = []
-            logs = self.logs.get(appId, [])
+            logs = self.logs.get(appId, {})
 
-            for timestamp, log in logs:
+            for timestamp in logs:
                 if timestamp <= parser.get_day_from_timestamp(to_timestamp):
-                    logs_from_timestamp.append(log)
+                    logs_to_timestamp.append(logs[timestamp])
 
             return logs_to_timestamp
         finally:
@@ -92,7 +92,7 @@ class LogManager(object):
 
         if (from_timestamp == EMPTY_TIMESTAMP):
             print("---------------------------Devuelvo los logs hasta el timestamp----------------------------------")
-            return self.get_logs_to_timestamp(appId, from_timestamp)
+            return self.get_logs_to_timestamp(appId, to_timestamp)
 
         if (to_timestamp == EMPTY_TIMESTAMP):
             print("---------------------------Devuelvo los logs hasta el timestamp----------------------------------")
