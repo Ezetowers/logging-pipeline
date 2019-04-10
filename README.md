@@ -16,7 +16,7 @@ sh logging-pipeline-up.sh
 
 ### Publish logs
 
-Publishing new log entries is done by doing a POST request to localhost:6060/log/<appId>. The JSON body must be in the form of:
+Publishing new log entries is done by doing a POST request to ``localhost:6060/log/<appId>``. The JSON body must be in the form of:
   
 ```json
 {
@@ -28,7 +28,7 @@ Publishing new log entries is done by doing a POST request to localhost:6060/log
 
 ### Retrieve logs
 
-To retrieve logs entries you have to do a GET request to localhost:6060/log/<appId>. The following query params are accepted:
+To retrieve logs entries you have to do a GET request to ``localhost:6060/log/<appId>``. The following query params are accepted:
  
 * from: a timestamp in the form ``YYYY-MM-DD HH:MM:SS.SSSSSS``
 * to: a timestamp in the form ``YYYY-MM-DD HH:MM:SS.SSSSSS``
