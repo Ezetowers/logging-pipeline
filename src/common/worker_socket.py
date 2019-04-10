@@ -27,21 +27,14 @@ class WorkerSocket(StringSocket):
 
     def receive_read_info(self):
         appId = super().receiveall(STATIC_FIELD_SIZE)
-        print("----------AppId: {}-----------".format(appId))
         from_time = super().receiveall(TIMESTAMP_FIELD_SIZE)
-        print("----------From time: {}-----------".format(from_time))
         to_time = super().receiveall(TIMESTAMP_FIELD_SIZE)
-        print("----------To time: {}-----------".format(to_time))
         tags = super().receive_with_size(STATIC_FIELD_SIZE)
-        print("----------Tags: {}-----------".format(tags))
         pattern = super().receive_with_size(STATIC_FIELD_SIZE)
 
         return ReadInfo(appId, from_time, to_time, tags, pattern)
 
     def send_read_info(self, read_info):
-        print("----------AppId: {}-----------".format(read_info.get_appId()), sys.stderr)
-        print("----------From time: {}-----------".format(read_info.get_from()), sys.stderr)
-        print("----------To time: {}-----------".format(read_info.get_to()), sys.stderr)
         super().sendall(read_info.get_appId())
         super().sendall(read_info.get_from())
         super().sendall(read_info.get_to())

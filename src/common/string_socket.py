@@ -35,7 +35,6 @@ class StringSocket(object):
             if not chunk:
                 raise RuntimeError('Lal')
             msg = msg + chunk.decode('UTF-8', 'ignore')
-        print("-----------Recibi un mensaje: {}-----------".format(msg))
         return msg
 
     def receive_with_size(self, size_field_size):

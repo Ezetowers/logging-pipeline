@@ -57,24 +57,17 @@ class LogFileManager(object):
         return self.log_files.get(appId).get("tags").get(tag)
 
     def get_log_files(self, appId, from_timestamp, to_timestamp, tag):
-        print("Mis timestamps son: {} y {}".format(from_timestamp, to_timestamp))
         if (from_timestamp == EMPTY_TIMESTAMP and to_timestamp == EMPTY_TIMESTAMP):
             if (tag != EMPTY_TAGS):
-                print("---------------------------Devuelvo los logs para el tag----------------------------------")
                 return self._get_log_files_for_tag(appId, tag)
-
-            print("---------------------------Devuelvo todos los logs----------------------------------")
             return self._get_all_log_files(appId)
 
         if (from_timestamp == EMPTY_TIMESTAMP):
-            print("---------------------------Devuelvo los logs hasta el timestamp----------------------------------")
             return self._get_log_files_to_timestamp(appId, to_timestamp)
 
         if (to_timestamp == EMPTY_TIMESTAMP):
-            print("---------------------------Devuelvo los logs hasta el timestamp----------------------------------")
             return self._get_log_files_from_timestamp(appId, from_timestamp)
-
-        print("---------------------------Devuelvo los logs en el rango----------------------------------")
+            
         return self._get_log_files_between_range(appId, from_timestamp, to_timestamp)
 
     def _get_log_files_for_tag(self, appId, tag):

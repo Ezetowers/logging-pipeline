@@ -31,7 +31,6 @@ class DbHandler(object):
             worker.start()
 
         while True:
-            print("---------------------------Acepto una conexion----------------------------------")
             request_skt, addr = skt.accept()
             requests.put(request_skt)
 
