@@ -54,7 +54,8 @@ class StringSocket(object):
         return self.receiveall(int(field_size))
 
     def close(self):
-        '''Closes the socket'''
+        '''Closes the socket immediately'''
+        self.skt.shutdown(socket.SHUT_RD)
         self.skt.close()
 
     def settimeout(self, time):

@@ -1,6 +1,7 @@
 import sys
 sys.path.append('../')
 
+import errno
 import threading
 import queue
 
@@ -43,30 +44,26 @@ class DbHandler(threading.Thread):
             workers.append(worker)
 
         while self.keep_running:
-            print("Estoy por aceptar")
-            request_skt, addr = self.skt.accept()
-            print("Ya acepte")
-            requests.put(request_skt)
-
-        print("salgo del loop")
+            try:
+                request_skt, addr = self.skt.accept()
+                requests.put(request_skt)
+            except IOError as serr:
+                if serr.errno != errno.EINVAL:
+                    raise serr
 
         while not requests.empty():
             requests.get().close()
 
         for worker in workers:
-            worker.stop()
+            requests.put(None)
+
         for worker in workers:
             worker.join()
 
-        print("termine")
-
     def stop(self):
         '''Tells the DbHandler to stop its execution'''
-        print("Estoy en el stop de los handlers")
         self.keep_running = False
-        self.skt.settimeout(0.1)
         self.skt.close()
-        print(self.keep_running)
 
 '''A DbHandler that spawns WriterWorker threads'''
 class WriterDbHandler(DbHandler):

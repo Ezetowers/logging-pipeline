@@ -15,7 +15,12 @@ class WriterWorker(threading.Thread):
         '''Run function, it gets connected sockets from its queue and then
         writes the requested information'''
         while self.keep_running:
-            skt = self.queue.get(True)
+            skt = self.queue.get()
+
+            if (not skt):
+                self.keep_running = False
+                continue
+
             write_info = skt.receive_write_info()
             self.logs.get_or_create_log_file_for_timestamp(write_info.get_appId(), write_info.get_timestamp()).write_log(write_info.get_timestamp(), write_info.get_tags(), write_info.get_msg())
 
@@ -25,10 +30,7 @@ class WriterWorker(threading.Thread):
 
             skt.send_write_confirmation()
             skt.close()
-
-    def stop(self):
-        '''Tells the worker to stop its execution'''
-        self.keep_running = False
+            self.queue.task_done()
 
 '''A thread that gets connected sockets from a queue and reads from a log
 regarding the information received'''
@@ -46,6 +48,11 @@ class ReaderWorker(threading.Thread):
         sends the readed requested information'''
         while self.keep_running:
             skt = self.queue.get(True)
+
+            if (not skt):
+                self.keep_running = False
+                continue
+
             read_info = skt.receive_read_info()
 
             logs_to_read = self.logs.get_log_files(read_info.get_appId(), read_info.get_from(), read_info.get_to(), read_info.get_tags())
@@ -56,7 +63,4 @@ class ReaderWorker(threading.Thread):
 
             skt.send_logs(logs_readed)
             skt.close()
-
-    def stop(self):
-        '''Tells the worker to stop its execution'''
-        self.keep_running = False
+            self.queue.task_done()

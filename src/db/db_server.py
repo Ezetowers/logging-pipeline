@@ -23,11 +23,8 @@ def main():
             reader.join()
             writer.join()
         except KeyboardInterrupt:
-            print("Ctrl-c received! Sending kill to threads...")
             reader.stop()
             writer.stop()
-
-    print("Termine")
 
 if __name__ == '__main__':
     main()
