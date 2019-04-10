@@ -12,7 +12,7 @@ TAGS_COL = "field"
 MSJ_COL = "msj"
 EMPTY_TIMESTAMP = "                          "
 
-class Log(object):
+class LogFile(object):
     def __init__(self, log_file_name):
         self.lock = threading.Lock()
         self.log_file_name = log_file_name
@@ -47,7 +47,7 @@ class Log(object):
                         continue
 
                     logs.append(log)
-                    
+
                 return logs
         finally:
             self.lock.release()

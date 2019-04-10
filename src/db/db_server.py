@@ -1,6 +1,6 @@
 import threading
 
-from log_manager import LogManager
+from log_file_manager import LogFileManager
 from db_handlers import ReaderDbHandler, WriterDbHandler
 
 HOST = '0.0.0.0'
@@ -16,7 +16,7 @@ def _spawn_writer(logs):
     writer.run()
 
 def main():
-    logs = LogManager()
+    logs = LogFileManager()
 
     writer = threading.Thread(target=_spawn_writer, args=(logs,))
     reader = threading.Thread(target=_spawn_reader, args=(logs,))
