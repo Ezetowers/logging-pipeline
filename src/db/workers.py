@@ -1,11 +1,15 @@
-class WriterWorker(object):
+import threading
+
+class WriterWorker(threading.Thread):
     def __init__(self, logs, queue):
         '''logs is a dictionario of Log objects and skt a socket'''
+        threading.Thread.__init__(self)
         self.logs = logs
         self.queue = queue
+        self.keep_running = True
 
     def run(self):
-        while True:
+        while self.keep_running:
             skt = self.queue.get(True)
             write_info = skt.receive_write_info()
             self.logs.get_or_create_log_file_for_timestamp(write_info.get_appId(), write_info.get_timestamp()).write_log(write_info.get_timestamp(), write_info.get_tags(), write_info.get_msg())
@@ -17,14 +21,20 @@ class WriterWorker(object):
             skt.send_write_confirmation()
             skt.close()
 
-class ReaderWorker(object):
+    def stop(self):
+        self.keep_running = False
+
+
+class ReaderWorker(threading.Thread):
     def __init__(self, logs, queue):
         '''logs is a dictionario of Log objects and skt a socket'''
+        threading.Thread.__init__(self)
         self.logs = logs
         self.queue = queue
+        self.keep_running = True
 
     def run(self):
-        while True:
+        while self.keep_running:
             skt = self.queue.get(True)
             read_info = skt.receive_read_info()
 
@@ -36,3 +46,7 @@ class ReaderWorker(object):
 
             skt.send_logs(logs_readed)
             skt.close()
+
+    def stop(self):
+        print("cambie el valor del self.run")
+        self.keep_running = False

@@ -43,3 +43,6 @@ class StringSocket(object):
 
     def close(self):
         self.skt.close()
+
+    def settimeout(self, time):
+        self.skt.settimeout(time)

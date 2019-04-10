@@ -4,28 +4,28 @@ from log_file_manager import LogFileManager
 from db_handlers import ReaderDbHandler, WriterDbHandler
 
 HOST = '0.0.0.0'
-WRITER_PORT = 6061
-READER_PORT = 6071
-
-def _spawn_reader(logs):
-    reader = ReaderDbHandler(logs, HOST, READER_PORT)
-    reader.run()
-
-def _spawn_writer(logs):
-    writer = WriterDbHandler(logs, HOST, WRITER_PORT)
-    writer.run()
+WRITER_PORT = 6069
+READER_PORT = 6079
 
 def main():
     logs = LogFileManager()
 
-    writer = threading.Thread(target=_spawn_writer, args=(logs,))
-    reader = threading.Thread(target=_spawn_reader, args=(logs,))
+    writer = WriterDbHandler(logs, HOST, WRITER_PORT)
+    reader = ReaderDbHandler(logs, HOST, READER_PORT)
 
     reader.start()
     writer.start()
 
-    reader.join()
-    writer.join()
+    while reader.is_alive() and writer.is_alive():
+        try:
+            reader.join()
+            writer.join()
+        except KeyboardInterrupt:
+            print("Ctrl-c received! Sending kill to threads...")
+            reader.stop()
+            writer.stop()
+
+    print("Termine")
 
 if __name__ == '__main__':
     main()
