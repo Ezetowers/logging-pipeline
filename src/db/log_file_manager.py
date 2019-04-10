@@ -67,7 +67,8 @@ class LogFileManager(object):
 
         if (to_timestamp == EMPTY_TIMESTAMP):
             return self._get_log_files_from_timestamp(appId, from_timestamp)
-            
+
+        print("---------------Obtengo todos los timestamps entre: {} y {}-----------------".format(from_timestamp, to_timestamp))
         return self._get_log_files_between_range(appId, from_timestamp, to_timestamp)
 
     def _get_log_files_for_tag(self, appId, tag):
@@ -90,10 +91,11 @@ class LogFileManager(object):
         self.lock.acquire()
         try:
             logs_to_timestamp = []
+            to_timestamp = parser.get_day_from_timestamp(to_timestamp)
             logs = self.log_files.get(appId, {}).get("days", {})
 
             for timestamp in logs:
-                if timestamp <= parser.get_day_from_timestamp(to_timestamp):
+                if timestamp <= to_timestamp:
                     logs_to_timestamp.append(logs[timestamp])
 
             return logs_to_timestamp
@@ -104,13 +106,11 @@ class LogFileManager(object):
         self.lock.acquire()
         try:
             logs_from_timestamp = []
+            from_timestamp = parser.get_day_from_timestamp(from_timestamp)
             logs = self.log_files.get(appId, {}).get("days", {})
 
-            print(self.log_files)
-            print(self.log_files.get(appId, {}))
-
             for timestamp in logs:
-                if timestamp >= parser.get_day_from_timestamp(from_timestamp):
+                if timestamp >= from_timestamp:
                     logs_from_timestamp.append(logs[timestamp])
 
             return logs_from_timestamp
@@ -120,13 +120,15 @@ class LogFileManager(object):
     def _get_log_files_between_range(self, appId, from_timestamp, to_timestamp):
         self.lock.acquire()
         try:
-            logs = []
-            days = parser.get_all_days_from_range(from_timestamp, to_timestamp)
+            logs_from_timestamp = []
+            from_timestamp = parser.get_day_from_timestamp(from_timestamp)
+            to_timestamp = parser.get_day_from_timestamp(to_timestamp)
+            logs = self.log_files.get(appId, {}).get("days", {})
 
-            for day in days:
-                if self.has_log(appId, day):
-                    logs.append(self._get_log(appId, day))
+            for timestamp in logs:
+                if timestamp >= from_timestamp and timestamp <= to_timestamp:
+                    logs_from_timestamp.append(logs[timestamp])
 
-            return days
+            return logs_from_timestamp
         finally:
             self.lock.release()
