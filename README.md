@@ -33,4 +33,4 @@ To retrieve logs entries you have to do a GET request to ``localhost:6060/log/<a
 * from: a timestamp in the form ``YYYY-MM-DD HH:MM:SS.SSSSSS``
 * to: a timestamp in the form ``YYYY-MM-DD HH:MM:SS.SSSSSS``
 * tags: one tag
-* pattern: an string pattern appearing in the message [TBA]
+* pattern: an string pattern appearing in the message.
