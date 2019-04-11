@@ -1,9 +1,8 @@
 import requests
 
-r = requests.get("http://localhost:6070/log/001")
-
 print("-----------------------------Empiezo el testing-------------------------------------")
 
+r = requests.get("http://localhost:6070/log/001")
 print("GET 001: Recibi {} logs, con status {}".format(len(r.json().get('logs')), r.status_code))
 
 logs = [{"msg" : "primer log", "tags" : "error", "timestamp" : "2019-02-01 09:30:20.120000"},
@@ -16,9 +15,9 @@ print("")
 print("")
 print("----------------------------Cargo varios logs----------------------------------------")
 
-#for log in logs:
-    #r = requests.post("http://localhost:6060/log/001", json=log)
-    #print("POST 001: envie {} y recibi {} con status {}".format(log, r.json(), r.status_code))
+for log in logs:
+    r = requests.post("http://localhost:6060/log/001", json=log)
+    print("POST 001: envie {} y recibi {} con status {}".format(log, r.json(), r.status_code))
 
 print("")
 print("")
