@@ -32,7 +32,9 @@ def getLog(appId):
     skt.send_read_info(read_info)
     logs_read = skt.receive_logs()
 
-    json_logs_read = [parser.from_log_to_json(log) for log in logs_read]
+    pattern = json_request_info.get('pattern')
+
+    json_logs_read = [parser.from_log_to_json(log) for log in logs_read if (not pattern or pattern in log.get_msg())]
 
     skt.close()
 
