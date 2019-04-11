@@ -15,7 +15,7 @@ retrieve-logs:
 db-server:
   image: db-server
   env_file:
-    - threads.env
+    - config.env
   ports:
     - "6071:6071"
     - "6061:6061"

@@ -18,9 +18,12 @@ class StringSocket(object):
         '''Binds the socket to a giver port and host'''
         self.skt.bind((host, port))
 
-    def listen(self):
+    def listen(self, queued_connections=None):
         '''Sets the socket to listening mode'''
-        self.skt.listen()
+        if queued_connections:
+            self.skt.listen(queued_connections)
+        else:
+            self.skt.listen()
 
     def accept(self):
         '''Accepts a new connection, a new StringSocket and

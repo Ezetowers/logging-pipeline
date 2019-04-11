@@ -11,10 +11,11 @@ READER_PORT = 6071
 
 def main():
     number_of_threads = int(os.environ['NUMBER_OF_THREADS'])
+    number_of_queued_connections = int(os.environ['MAX_QUEUED_CONNECTIONS'])
     logs = LogFileManager()
 
-    writer = WriterDbHandler(logs, number_of_threads, HOST, WRITER_PORT)
-    reader = ReaderDbHandler(logs, number_of_threads, HOST, READER_PORT)
+    writer = WriterDbHandler(logs, number_of_threads, number_of_queued_connections, HOST, WRITER_PORT)
+    reader = ReaderDbHandler(logs, number_of_threads, number_of_queued_connections, HOST, READER_PORT)
 
     reader.start()
     writer.start()

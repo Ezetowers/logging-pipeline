@@ -11,16 +11,18 @@ from common.worker_socket import WorkerSocket
 '''A base database handler that receives incomming connections and spawns
 threads for processing them'''
 class DbHandler(threading.Thread):
-    def __init__(self, logs, number_of_threads, host, port):
+    def __init__(self, logs, number_of_workers, number_of_queued_connections, host, port):
         '''Initializer for the DbHandler object, it takes a LogFileManager,
-        a host and a port to listen to'''
+        the number of workers that it has, the number of maximum queued
+        connections, a host and a port to listen to'''
         threading.Thread.__init__(self)
         self.logs = logs
         self.host = host
         self.port = port
         self.skt = WorkerSocket()
         self.keep_running = True
-        self.number_of_threads = number_of_threads
+        self.number_of_workers = number_of_workers
+        self.number_of_queued_connections = number_of_queued_connections
 
     def _spawn_worker(self, reading_requests):
         '''Returns a thread to use everytime a connections is accepted'''
@@ -32,11 +34,11 @@ class DbHandler(threading.Thread):
         requests = queue.Queue()
 
         self.skt.bind(self.host, self.port)
-        self.skt.listen()
+        self.skt.listen(self.number_of_queued_connections)
 
         workers = []
 
-        for i in range(self.number_of_threads):
+        for i in range(self.number_of_workers):
             worker = self._spawn_worker(requests)
             worker.setDaemon(True)
             worker.start()
@@ -66,16 +68,16 @@ class DbHandler(threading.Thread):
 
 '''A DbHandler that spawns WriterWorker threads'''
 class WriterDbHandler(DbHandler):
-    def __init__(self, logs, number_of_threads, host, port):
-        super().__init__(logs, number_of_threads, host, port)
+    def __init__(self, logs, number_of_workers, number_of_queued_connections, host, port):
+        super().__init__(logs, number_of_workers, number_of_queued_connections, host, port)
 
     def _spawn_worker(self, writing_requests):
         return WriterWorker(self.logs, writing_requests)
 
 '''A DbHandler that spawns ReaderWorker threads'''
 class ReaderDbHandler(DbHandler):
-    def __init__(self, logs, number_of_threads, host, port):
-        super().__init__(logs, number_of_threads, host, port)
+    def __init__(self, logs, number_of_workers, number_of_queued_connections, host, port):
+        super().__init__(logs, number_of_workers, number_of_queued_connections, host, port)
 
     def _spawn_worker(self, reading_requests):
         return ReaderWorker(self.logs, reading_requests)
