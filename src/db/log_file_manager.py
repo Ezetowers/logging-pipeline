@@ -1,4 +1,4 @@
-import threading
+import fcntl
 
 from log_file import LogFile
 import parser
@@ -6,11 +6,12 @@ import parser
 EMPTY_TIMESTAMP = "                          "
 EMPTY_TAGS = " "
 
+LOCK_FILE = "lock.temp"
+
 '''A manager for a collection of LogFile objects'''
 class LogFileManager(object):
     def __init__(self):
         '''Initializer for a LogFileManager'''
-        self.lock = threading.Lock()
         self.log_files = {}
 
     def has_log_file_for_timestamp(self, appId, timestamp):
@@ -27,13 +28,14 @@ class LogFileManager(object):
     def get_or_create_log_file_for_timestamp(self, appId, timestamp):
         '''Gets the LogFile for a given timestamp and appId, if there is no one,
         one is created and then returned'''
-        self.lock.acquire()
-        try:
+        with open(LOCK_FILE, mode='a') as lock_file:
+            fcntl.flock(lock_file, fcntl.LOCK_EX)
+
             if not self.has_log_file_for_timestamp(appId, timestamp):
                 self._add_log_file_for_timestamp(appId, timestamp)
             return self._get_log_file_for_timestamp(appId, timestamp)
-        finally:
-            self.lock.release()
+
+            fcntl.flock(log_file, fcntl.LOCK_UN)
 
     def _add_log_file_for_timestamp(self, appId, timestamp):
         day = parser.get_day_from_timestamp(timestamp)
@@ -47,16 +49,17 @@ class LogFileManager(object):
     def get_or_create_log_file_for_tags(self, appId, tags):
         '''Gets the LogFiles for a given set of tags and appId, if there is no
         one for at least one of them, they are created and then returned'''
-        self.lock.acquire()
-        try:
+        with open(LOCK_FILE, mode='a') as lock_file:
+            fcntl.flock(lock_file, fcntl.LOCK_EX)
+
             log_files = []
             for tag in tags.split(" "):
                 if not self.has_log_file_for_tag(appId, tag):
                     self._add_log_file_for_tag(appId, tag)
                 log_files.append(self._get_log_file_for_tag(appId, tag))
             return log_files
-        finally:
-            self.lock.release()
+
+            fcntl.flock(log_file, fcntl.LOCK_UN)
 
     def _add_log_file_for_tag(self, appId, tag):
         if (not appId in self.log_files):
@@ -83,24 +86,27 @@ class LogFileManager(object):
         return self._get_log_files_between_range(appId, from_timestamp, to_timestamp)
 
     def _get_log_files_for_tag(self, appId, tag):
-        self.lock.acquire()
-        try:
+        with open(LOCK_FILE, mode='a') as lock_file:
+            fcntl.flock(lock_file, fcntl.LOCK_EX)
+
             if (self.has_log_file_for_tag(appId, tag)):
                 return [self.log_files.get(appId).get("tags").get(tag)]
             return []
-        finally:
-            self.lock.release()
+
+            fcntl.flock(log_file, fcntl.LOCK_UN)
 
     def _get_all_log_files(self, appId):
-        self.lock.acquire()
-        try:
+        with open(LOCK_FILE, mode='a') as lock_file:
+            fcntl.flock(lock_file, fcntl.LOCK_EX)
+
             return self.log_files.get(appId, {}).get("days", {}).values()
-        finally:
-            self.lock.release()
+
+            fcntl.flock(log_file, fcntl.LOCK_UN)
 
     def _get_log_files_to_timestamp(self, appId, to_timestamp):
-        self.lock.acquire()
-        try:
+        with open(LOCK_FILE, mode='a') as lock_file:
+            fcntl.flock(lock_file, fcntl.LOCK_EX)
+
             logs_to_timestamp = []
             to_timestamp = parser.get_day_from_timestamp(to_timestamp)
             logs = self.log_files.get(appId, {}).get("days", {})
@@ -110,12 +116,13 @@ class LogFileManager(object):
                     logs_to_timestamp.append(logs[timestamp])
 
             return logs_to_timestamp
-        finally:
-            self.lock.release()
+
+            fcntl.flock(log_file, fcntl.LOCK_UN)
 
     def _get_log_files_from_timestamp(self, appId, from_timestamp):
-        self.lock.acquire()
-        try:
+        with open(LOCK_FILE, mode='a') as lock_file:
+            fcntl.flock(lock_file, fcntl.LOCK_EX)
+
             logs_from_timestamp = []
             from_timestamp = parser.get_day_from_timestamp(from_timestamp)
             logs = self.log_files.get(appId, {}).get("days", {})
@@ -125,12 +132,13 @@ class LogFileManager(object):
                     logs_from_timestamp.append(logs[timestamp])
 
             return logs_from_timestamp
-        finally:
-            self.lock.release()
+
+            fcntl.flock(log_file, fcntl.LOCK_UN)
 
     def _get_log_files_between_range(self, appId, from_timestamp, to_timestamp):
-        self.lock.acquire()
-        try:
+        with open(LOCK_FILE, mode='a') as lock_file:
+            fcntl.flock(lock_file, fcntl.LOCK_EX)
+
             logs_from_timestamp = []
             from_timestamp = parser.get_day_from_timestamp(from_timestamp)
             to_timestamp = parser.get_day_from_timestamp(to_timestamp)
@@ -141,5 +149,5 @@ class LogFileManager(object):
                     logs_from_timestamp.append(logs[timestamp])
 
             return logs_from_timestamp
-        finally:
-            self.lock.release()
+
+            fcntl.flock(log_file, fcntl.LOCK_UN)

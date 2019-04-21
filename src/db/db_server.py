@@ -1,6 +1,6 @@
 #Entry point for the database server of the logging pipeline
 import os
-import threading
+from multiprocessing.managers import SyncManager
 
 from log_file_manager import LogFileManager
 from db_handlers import ReaderDbHandler, WriterDbHandler
@@ -12,7 +12,11 @@ READER_PORT = 6071
 def main():
     number_of_threads = int(os.environ['NUMBER_OF_THREADS'])
     number_of_queued_connections = int(os.environ['MAX_QUEUED_CONNECTIONS'])
-    logs = LogFileManager()
+
+    SyncManager.register('LogFileManager', LogFileManager)
+    manager = SyncManager()
+    manager.start()
+    logs = manager.LogFileManager()
 
     writer = WriterDbHandler(logs, number_of_threads, number_of_queued_connections, HOST, WRITER_PORT)
     reader = ReaderDbHandler(logs, number_of_threads, number_of_queued_connections, HOST, READER_PORT)

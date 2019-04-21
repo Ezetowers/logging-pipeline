@@ -2,20 +2,20 @@ import sys
 sys.path.append('../')
 
 import errno
-import threading
-import queue
+import multiprocessing
 
 from workers import WriterWorker, ReaderWorker
 from common.worker_socket import WorkerSocket
 
 '''A base database handler that receives incomming connections and spawns
 threads for processing them'''
-class DbHandler(threading.Thread):
+class DbHandler(multiprocessing.Process):
     def __init__(self, logs, number_of_workers, number_of_queued_connections, host, port):
         '''Initializer for the DbHandler object, it takes a LogFileManager,
         the number of workers that it has, the number of maximum queued
         connections, a host and a port to listen to'''
-        threading.Thread.__init__(self)
+        multiprocessing.Process.__init__(self)
+
         self.logs = logs
         self.host = host
         self.port = port
@@ -31,7 +31,7 @@ class DbHandler(threading.Thread):
     def run(self):
         '''Run function, it accepts connections and spawns threads with
         that new connections'''
-        requests = queue.Queue()
+        requests = multiprocessing.Queue()
 
         self.skt.bind(self.host, self.port)
         self.skt.listen(self.number_of_queued_connections)
@@ -40,7 +40,7 @@ class DbHandler(threading.Thread):
 
         for i in range(self.number_of_workers):
             worker = self._spawn_worker(requests)
-            worker.setDaemon(True)
+            #worker.daemon = True
             worker.start()
             workers.append(worker)
 

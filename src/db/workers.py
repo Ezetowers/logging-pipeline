@@ -1,12 +1,13 @@
-import threading
+import multiprocessing
 
 '''A thread that gets connected sockets from a queue and writes to a log
 regarding the information received'''
-class WriterWorker(threading.Thread):
+class WriterWorker(multiprocessing.Process):
     def __init__(self, logs, queue):
         '''Initializer for the WriterWorker, it receives a LogFileManager
         and a blocking Queue'''
-        threading.Thread.__init__(self)
+        multiprocessing.Process.__init__(self)
+
         self.logs = logs
         self.queue = queue
         self.keep_running = True
@@ -30,15 +31,15 @@ class WriterWorker(threading.Thread):
 
             skt.send_write_confirmation()
             skt.close()
-            self.queue.task_done()
 
 '''A thread that gets connected sockets from a queue and reads from a log
 regarding the information received'''
-class ReaderWorker(threading.Thread):
+class ReaderWorker(multiprocessing.Process):
     def __init__(self, logs, queue):
         '''Initializer for the ReaderWorker, it receives a LogFileManager
         and a blocking Queue'''
-        threading.Thread.__init__(self)
+        multiprocessing.Process.__init__(self)
+
         self.logs = logs
         self.queue = queue
         self.keep_running = True
@@ -63,4 +64,3 @@ class ReaderWorker(threading.Thread):
 
             skt.send_logs(logs_readed)
             skt.close()
-            self.queue.task_done()

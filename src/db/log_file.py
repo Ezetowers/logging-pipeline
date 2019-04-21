@@ -1,4 +1,4 @@
-import threading
+import fcntl
 import csv
 import sys
 
@@ -17,47 +17,45 @@ EMPTY_TAGS = " "
 class LogFile(object):
     def __init__(self, log_file_name):
         '''Initializer for the LogFile, it takes a name for its file'''
-        self.lock = threading.Lock()
         self.log_file_name = log_file_name
 
     def write_log(self, timestamp, tags, msj):
         '''Writes a log to its file'''
-        self.lock.acquire()
-        try:
-            with open(self.log_file_name, mode='a') as log_file:
-                log_writer = csv.writer(log_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        with open(self.log_file_name, mode='a') as log_file:
+            fcntl.flock(log_file, fcntl.LOCK_EX)
 
-                if (not log_file.tell()):
-                    log_writer.writerow([TIMESTAMP_COL, TAGS_COL, MSJ_COL])
+            log_writer = csv.writer(log_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
-                log_writer.writerow([timestamp, tags, msj])
-        finally:
-            self.lock.release()
+            if (not log_file.tell()):
+                log_writer.writerow([TIMESTAMP_COL, TAGS_COL, MSJ_COL])
+
+            log_writer.writerow([timestamp, tags, msj])
+
+            fcntl.flock(log_file, fcntl.LOCK_UN)
 
     def read_log(self, appId, from_timestamp, to_timestamp, tag):
         '''Returns the all the LogEntry objects of id appId, that are between
         from_timestamp date to to_timestamp date and have the given tag'''
-        self.lock.acquire()
-        try:
+        with open(self.log_file_name, mode='r+') as log_file:
             logs = []
-            with open(self.log_file_name, mode='r') as log_file:
-                log_reader = csv.DictReader(log_file)
-                for row in log_reader:
-                    log = LogEntry(appId, row[MSJ_COL], row[TAGS_COL], row[TIMESTAMP_COL])
-                    log_timestamp = parser.get_datetime_from_timestamp(log.get_timestamp())
-                    log_tags = log.get_tags().split(" ")
+            fcntl.flock(log_file, fcntl.LOCK_SH)
 
-                    if (from_timestamp != EMPTY_TIMESTAMP and log_timestamp < parser.get_datetime_from_timestamp(from_timestamp)):
-                        continue
+            log_reader = csv.DictReader(log_file)
+            for row in log_reader:
+                log = LogEntry(appId, row[MSJ_COL], row[TAGS_COL], row[TIMESTAMP_COL])
+                log_timestamp = parser.get_datetime_from_timestamp(log.get_timestamp())
+                log_tags = log.get_tags().split(" ")
 
-                    if (to_timestamp != EMPTY_TIMESTAMP and log_timestamp > parser.get_datetime_from_timestamp(to_timestamp)):
-                        continue
+                if (from_timestamp != EMPTY_TIMESTAMP and log_timestamp < parser.get_datetime_from_timestamp(from_timestamp)):
+                    continue
 
-                    if (tag != EMPTY_TAGS and tag not in log_tags):
-                        continue
+                if (to_timestamp != EMPTY_TIMESTAMP and log_timestamp > parser.get_datetime_from_timestamp(to_timestamp)):
+                    continue
 
-                    logs.append(log)
+                if (tag != EMPTY_TAGS and tag not in log_tags):
+                    continue
 
-                return logs
-        finally:
-            self.lock.release()
+                logs.append(log)
+
+            fcntl.flock(log_file, fcntl.LOCK_UN)
+            return logs
