@@ -1,5 +1,6 @@
 #Entry point for the database server of the logging pipeline
 import os
+import signal
 from multiprocessing.managers import SyncManager
 
 from log_file_manager import LogFileManager
@@ -9,28 +10,34 @@ HOST = '0.0.0.0'
 WRITER_PORT = 6061
 READER_PORT = 6071
 
-def main():
-    number_of_threads = int(os.environ['NUMBER_OF_THREADS'])
-    number_of_queued_connections = int(os.environ['MAX_QUEUED_CONNECTIONS'])
+class DbServer(object):
+    def __init__(self, number_of_workers, number_of_queued_connections):
+        SyncManager.register('LogFileManager', LogFileManager)
+        manager = SyncManager()
+        manager.start()
+        logs = manager.LogFileManager()
 
-    SyncManager.register('LogFileManager', LogFileManager)
-    manager = SyncManager()
-    manager.start()
-    logs = manager.LogFileManager()
+        self.writer = WriterDbHandler(logs, number_of_workers, number_of_queued_connections, HOST, WRITER_PORT)
+        self.reader = ReaderDbHandler(logs, number_of_workers, number_of_queued_connections, HOST, READER_PORT)
 
-    writer = WriterDbHandler(logs, number_of_threads, number_of_queued_connections, HOST, WRITER_PORT)
-    reader = ReaderDbHandler(logs, number_of_threads, number_of_queued_connections, HOST, READER_PORT)
+    def quit(self, signal, frame):
+        self.reader.stop()
+        self.writer.stop()
+        self.reader.join()
+        self.writer.join()
 
-    reader.start()
-    writer.start()
+    def run(self):
+        self.reader.start()
+        self.writer.start()
 
-    while reader.is_alive() and writer.is_alive():
-        try:
-            reader.join()
-            writer.join()
-        except KeyboardInterrupt:
-            reader.stop()
-            writer.stop()
+        signal.signal(signal.SIGTERM, self.quit)
+        signal.signal(signal.SIGINT, self.quit)
+
+        signal.pause()
 
 if __name__ == '__main__':
-    main()
+    number_of_workers = 4 #int(os.environ['NUMBER_OF_THREADS'])
+    number_of_queued_connections = 10 #int(os.environ['MAX_QUEUED_CONNECTIONS'])
+
+    server = DbServer(number_of_workers, number_of_queued_connections)
+    server.run()
