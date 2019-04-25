@@ -1,5 +1,5 @@
-import errno
 import multiprocessing
+import signal
 
 from .worker_socket import WorkerSocket
 
@@ -19,6 +19,9 @@ class ConnectionHandler(multiprocessing.Process):
         self.number_of_workers = number_of_workers
         self.number_of_queued_connections = number_of_queued_connections
 
+        signal.signal(signal.SIGINT, self.stop)
+        signal.signal(signal.SIGTERM, self.stop)
+
     def _spawn_worker(self, reading_requests):
         '''Returns a thread to use everytime a connections is accepted'''
         raise NotImplementedError("Abstract method!")
@@ -26,7 +29,10 @@ class ConnectionHandler(multiprocessing.Process):
     def run(self):
         '''Run function, it accepts connections and spawns threads with
         that new connections'''
+        print("-------------Empiezo el run-----------")
         requests = multiprocessing.Queue()
+
+        self.skt.settimeout(1)
 
         self.skt.bind(self.host, self.port)
         print("----------------Me conecto a {}:{}-----------".format(self.host, self.port))
@@ -42,25 +48,48 @@ class ConnectionHandler(multiprocessing.Process):
             workers.append(worker)
 
         while self.keep_running:
-            try:
-                print("----------------Estoy por aceptar una conexion-----------")
-                request_skt, addr = self.skt.accept()
-                print("-------------Acepto una coneccion-----------")
-                requests.put(request_skt)
-            except IOError as serr:
-                if serr.errno != errno.EINVAL:
-                    raise serr
+            #print("----------------Estoy por aceptar una conexion-----------")
+            request_skt, addr = self.skt.accept()
+            print("-------------Acepto una coneccion-----------")
+            print("Mi keep_running es: {}".format(self.keep_running))
+            if not request_skt:
+                print("No tengo request skt!")
+                continue
+
+            requests.put(request_skt)
+
+        print("")
+        print("------------------I am hier!-------------------")
+
+        self.skt.close()
+
+        print("")
+        print("-----------Cerre el socket-------------")
 
         while not requests.empty():
             requests.get().close()
 
+        print("")
+        print("-----------Limpio los requests------------")
+
         for worker in workers:
             requests.put(None)
+
+        print("")
+        print("-----------Pongo los None------------")
 
         for worker in workers:
             worker.join()
 
-    def stop(self):
+        print("")
+        print("-----------Le doy join a los workers-------------")
+
+        print("-----------Sali-------------")
+
+        return
+
+    def stop(self, signum, frame):
         '''Tells the DbHandler to stop its execution'''
         self.keep_running = False
-        self.skt.close()
+        print("Recibi el stop")
+        print("")

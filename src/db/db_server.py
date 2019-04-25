@@ -20,9 +20,11 @@ class DbServer(object):
         self.writer = WriterDbHandler(logs, number_of_workers, number_of_queued_connections, HOST, WRITER_PORT)
         self.reader = ReaderDbHandler(logs, number_of_workers, number_of_queued_connections, HOST, READER_PORT)
 
-    def quit(self, signal, frame):
-        self.reader.stop()
-        self.writer.stop()
+    def quit(self, sig_num, frame):
+        pid_reader = self.reader.pid
+        pid_writer = self.writer.pid
+        os.kill(pid_reader, signal.SIGTERM)
+        os.kill(pid_writer, signal.SIGTERM)
         self.reader.join()
         self.writer.join()
 

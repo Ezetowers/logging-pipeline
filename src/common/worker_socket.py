@@ -2,6 +2,7 @@ from .string_socket import StringSocket
 from .wrappers import LogEntry, ReadInfo
 
 import sys
+import socket
 
 sys.path.append('../')
 from api.common.log_request import LogRequest
@@ -24,8 +25,11 @@ class WorkerSocket(StringSocket):
     def accept(self):
         '''Accepts a new connection, a new WorkerSocket and
         the connected address is returned'''
-        new_skt, addr = self.skt.accept()
-        return WorkerSocket(new_skt), addr
+        try:
+            new_skt, addr = self.skt.accept()
+            return WorkerSocket(new_skt), addr
+        except socket.timeout:
+            return None, None
 
     def receive_write_info(self):
         '''Receives write information and returns a LogEntry object'''

@@ -28,8 +28,11 @@ class StringSocket(object):
     def accept(self):
         '''Accepts a new connection, a new StringSocket and
         the connected address is returned'''
-        new_skt, addr = self.skt.accept()
-        return StringSocket(new_skt), addr
+        try:
+            new_skt, addr = self.skt.accept()
+            return StringSocket(new_skt), addr
+        except socket.timeout:
+            return None, None
 
     def sendall(self, msg):
         '''Sends the full string msg'''
