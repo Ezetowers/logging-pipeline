@@ -3,10 +3,15 @@ from .wrappers import LogEntry, ReadInfo
 
 import sys
 
+sys.path.append('../')
+from api.common.log_request import LogRequest
+
 STATIC_FIELD_SIZE = 3
 TIMESTAMP_FIELD_SIZE = 26 #YYYY-MM-DD HH:MM:SS.SSSSSS
 LOGS_NUMBER_FIELD_SIZE = 5
 WRITE_STATUS_FIELD_SIZE = 2
+
+JSON_FIELD_SIZE = 5
 
 '''A worker socket aware of the difficult lifes of the employees,
 it is just a StringSocket with enhanced options'''
@@ -46,8 +51,8 @@ class WorkerSocket(StringSocket):
         super().sendall(read_info.get_appId())
         super().sendall(read_info.get_from())
         super().sendall(read_info.get_to())
-        super().send_with_size(read_info.get_tags())
-        super().send_with_size(read_info.get_pattern())
+        super().send_with_size(read_info.get_tags(), STATIC_FIELD_SIZE)
+        super().send_with_size(read_info.get_pattern(), STATIC_FIELD_SIZE)
 
     def send_write_confirmation(self):
         '''Send a message to confirm a successful write'''
@@ -57,8 +62,8 @@ class WorkerSocket(StringSocket):
         '''Sends all the information of a LogEntry object'''
         super().sendall(log.get_appId())
         super().sendall(log.get_timestamp())
-        super().send_with_size(log.get_msg())
-        super().send_with_size(log.get_tags())
+        super().send_with_size(log.get_msg(), STATIC_FIELD_SIZE)
+        super().send_with_size(log.get_tags(), STATIC_FIELD_SIZE)
 
     def send_logs(self, logs):
         '''Sends all the information of a list LogEntry objects'''
@@ -85,3 +90,27 @@ class WorkerSocket(StringSocket):
     def receive_write_status(self):
         '''Receives a write confirmation'''
         return super().receiveall(WRITE_STATUS_FIELD_SIZE)
+
+    def receive_request(self):
+        request_type = super().receiveall(STATIC_FIELD_SIZE)
+        print("MI REQUEST TYPE ES {}".format(request_type))
+        request_args = super().receive_with_size(JSON_FIELD_SIZE)
+        print("MIS REQUEST ARGS SON {}".format(request_args))
+
+        return LogRequest(request_type, request_args)
+
+    def send_response(self, status, msg):
+        super().sendall(str(status))
+        super().send_with_size(msg, JSON_FIELD_SIZE)
+
+    def send_request(self, request_type, request_args):
+        super().sendall(request_type)
+        super().send_with_size(request_args, JSON_FIELD_SIZE)
+
+    def receive_response(self):
+        status = super().receiveall(STATIC_FIELD_SIZE)
+        msg = super().receive_with_size(JSON_FIELD_SIZE)
+
+        print("-------------Recibo el status {} y el msg {}---------------".format(status, msg))
+
+        return status, msg

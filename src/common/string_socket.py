@@ -35,9 +35,9 @@ class StringSocket(object):
         '''Sends the full string msg'''
         self.skt.sendall(msg.encode())
 
-    def send_with_size(self, msg):
+    def send_with_size(self, msg, max_digits):
         '''Sends the size of the string msg and then the full msg'''
-        self.skt.sendall(str(len(msg)).zfill(3).encode())
+        self.skt.sendall(str(len(msg)).zfill(max_digits).encode())
         self.skt.sendall(msg.encode())
 
     def receiveall(self, msg_len):

@@ -3,13 +3,13 @@ sys.path.append('../../')
 
 from common.wrappers import ReadInfo, LogEntry
 
-def from_json_to_read_info(json, appId):
+def from_json_to_read_info(data):
     '''Returns a ReadInfo object from a json and an appId'''
-    return ReadInfo(appId, json.get('from'), json.get('to'), json.get('tags'), json.get('pattern'))
+    return ReadInfo(data.get('appId'), data.get('from'), data.get('to'), data.get('tags'), data.get('pattern'))
 
-def from_json_to_log(appId, json):
+def from_json_to_log(data):
     '''Creates a LogEntry object from a json and an appId'''
-    return LogEntry(appId, json.get('msg'), json.get('tags'), json.get('timestamp'))
+    return LogEntry(data.get('appId'), data.get('msg'), data.get('tags'), data.get('timestamp'))
 
 def from_log_to_json(log):
     '''Creates a json with the information of a LogEntry object'''
