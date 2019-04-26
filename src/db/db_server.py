@@ -23,6 +23,8 @@ class DbServer(object):
     def quit(self, sig_num, frame):
         pid_reader = self.reader.pid
         pid_writer = self.writer.pid
+        print("-------RECIBI EL QUIT, LOS PID SON READER: {}, HANDLER: {} y SERVER: {}----------".format(pid_reader, pid_writer, os.getpid()))
+        print("")
         os.kill(pid_reader, signal.SIGTERM)
         os.kill(pid_writer, signal.SIGTERM)
         self.reader.join()

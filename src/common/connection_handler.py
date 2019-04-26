@@ -1,5 +1,6 @@
 import multiprocessing
 import signal
+import os
 
 from .worker_socket import WorkerSocket
 
@@ -15,7 +16,7 @@ class ConnectionHandler(multiprocessing.Process):
         self.host = host
         self.port = port
         self.skt = WorkerSocket()
-        self.keep_running = True
+        self.stop_running = multiprocessing.Event()
         self.number_of_workers = number_of_workers
         self.number_of_queued_connections = number_of_queued_connections
 
@@ -47,11 +48,13 @@ class ConnectionHandler(multiprocessing.Process):
             worker.start()
             workers.append(worker)
 
-        while self.keep_running:
+        while not self.stop_running.is_set():
             #print("----------------Estoy por aceptar una conexion-----------")
             request_skt, addr = self.skt.accept()
             print("-------------Acepto una coneccion-----------")
-            print("Mi keep_running es: {}".format(self.keep_running))
+            print("-------------Mi pid es {}--------------------".format(os.getpid()))
+            print("")
+            print("Mi keep_running es: {}".format(self.stop_running.is_set()))
             if not request_skt:
                 print("No tengo request skt!")
                 continue
@@ -90,6 +93,6 @@ class ConnectionHandler(multiprocessing.Process):
 
     def stop(self, signum, frame):
         '''Tells the DbHandler to stop its execution'''
-        self.keep_running = False
-        print("Recibi el stop")
+        self.stop_running.set()
+        print("Recibi el stop, mi pid es {}".format(os.getpid()))
         print("")

@@ -48,7 +48,7 @@ class ReaderWorker(multiprocessing.Process):
         '''Run function, it gets connected sockets from its queue and then
         sends the readed requested information'''
         while self.keep_running:
-            skt = self.queue.get(True)
+            skt = self.queue.get()
 
             if (not skt):
                 self.keep_running = False
