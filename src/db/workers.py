@@ -3,20 +3,21 @@ import multiprocessing
 '''A thread that gets connected sockets from a queue and writes to a log
 regarding the information received'''
 class WriterWorker(multiprocessing.Process):
-    def __init__(self, logs, queue):
+    def __init__(self, logs, queue, finished_queue):
         '''Initializer for the WriterWorker, it receives a LogFileManager
         and a blocking Queue'''
         multiprocessing.Process.__init__(self)
 
         self.logs = logs
         self.queue = queue
+        self.finished_queue = finished_queue
         self.keep_running = True
 
     def run(self):
         '''Run function, it gets connected sockets from its queue and then
         writes the requested information'''
         while self.keep_running:
-            skt = self.queue.get()
+            id_skt, skt = self.queue.get()
 
             if (not skt):
                 self.keep_running = False
@@ -31,24 +32,26 @@ class WriterWorker(multiprocessing.Process):
 
             skt.send_write_confirmation()
             skt.close()
+            self.finished_queue.put(id_skt)
 
 '''A thread that gets connected sockets from a queue and reads from a log
 regarding the information received'''
 class ReaderWorker(multiprocessing.Process):
-    def __init__(self, logs, queue):
+    def __init__(self, logs, queue, finished_queue):
         '''Initializer for the ReaderWorker, it receives a LogFileManager
         and a blocking Queue'''
         multiprocessing.Process.__init__(self)
 
         self.logs = logs
         self.queue = queue
+        self.finished_queue = finished_queue
         self.keep_running = True
 
     def run(self):
         '''Run function, it gets connected sockets from its queue and then
         sends the readed requested information'''
         while self.keep_running:
-            skt = self.queue.get()
+            id_skt, skt = self.queue.get()
 
             if (not skt):
                 self.keep_running = False
@@ -64,3 +67,4 @@ class ReaderWorker(multiprocessing.Process):
 
             skt.send_logs(logs_readed)
             skt.close()
+            self.finished_queue.put(id_skt)

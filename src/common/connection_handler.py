@@ -1,8 +1,23 @@
 import multiprocessing
+import threading
 import signal
 import os
+import uuid
 
 from .worker_socket import WorkerSocket
+
+class ConnectionHandlerSocketCloser(threading.Thread):
+    def __init__(self, finished_sockets, sockets):
+        threading.Thread.__init__(self)
+        self.sockets = sockets
+        self.finished_sockets = finished_sockets
+
+    def run(self):
+        while True:
+            skt_to_close = self.finished_sockets.get()
+            if not skt_to_close:
+                break
+            self.sockets.get(skt_to_close).close()
 
 '''A connection handler that receives incomming connections and spawns
 process for processing them'''
@@ -23,7 +38,7 @@ class ConnectionHandler(multiprocessing.Process):
         signal.signal(signal.SIGINT, self.stop)
         signal.signal(signal.SIGTERM, self.stop)
 
-    def _spawn_worker(self, reading_requests):
+    def _spawn_worker(self, requests, finished_requests):
         '''Returns a thread to use everytime a connections is accepted'''
         raise NotImplementedError("Abstract method!")
 
@@ -31,7 +46,10 @@ class ConnectionHandler(multiprocessing.Process):
         '''Run function, it accepts connections and spawns threads with
         that new connections'''
         print("-------------Empiezo el run-----------")
+
         requests = multiprocessing.Queue()
+        finished_requests = multiprocessing.Queue()
+        sockets = {}
 
         self.skt.settimeout(1)
 
@@ -40,29 +58,31 @@ class ConnectionHandler(multiprocessing.Process):
         self.skt.listen(self.number_of_queued_connections)
         print("----------------Escucho-----------")
 
+        closing_worker = ConnectionHandlerSocketCloser(finished_requests, sockets)
         workers = []
 
         for i in range(self.number_of_workers):
-            worker = self._spawn_worker(requests)
+            worker = self._spawn_worker(requests, finished_requests)
             #worker.daemon = True
             worker.start()
             workers.append(worker)
 
+        closing_worker.start()
+
         while not self.stop_running.is_set():
-            #print("----------------Estoy por aceptar una conexion-----------")
+            print("----------------Estoy por aceptar una conexion-----------")
             request_skt, addr = self.skt.accept()
             print("-------------Acepto una coneccion-----------")
             print("-------------Mi pid es {}--------------------".format(os.getpid()))
             print("")
             print("Mi keep_running es: {}".format(self.stop_running.is_set()))
             if not request_skt:
-                print("No tengo request skt!")
                 continue
 
-            requests.put(request_skt)
+            socket_id = str(uuid.uuid4())
+            sockets[socket_id] = request_skt
 
-        print("")
-        print("------------------I am hier!-------------------")
+            requests.put((socket_id, request_skt))
 
         self.skt.close()
 
@@ -76,13 +96,17 @@ class ConnectionHandler(multiprocessing.Process):
         print("-----------Limpio los requests------------")
 
         for worker in workers:
-            requests.put(None)
+            requests.put((None, None))
+
+        finished_requests.put(None)
 
         print("")
         print("-----------Pongo los None------------")
 
         for worker in workers:
             worker.join()
+
+        closing_worker.join()
 
         print("")
         print("-----------Le doy join a los workers-------------")

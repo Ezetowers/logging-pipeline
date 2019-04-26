@@ -15,11 +15,12 @@ DB_SERVER_WRITE_PORT = 6061
 
 ''''''
 class GetWorker(multiprocessing.Process):
-    def __init__(self, queue):
+    def __init__(self, queue, finished_queue):
         ''''''
         multiprocessing.Process.__init__(self)
 
         self.queue = queue
+        self.finished_queue = finished_queue
         self.keep_running = True
 
     def run(self):
@@ -27,7 +28,7 @@ class GetWorker(multiprocessing.Process):
         writes the requested information'''
         print("----------------RUN GET worker-----------")
         while self.keep_running:
-            skt = self.queue.get()
+            id_skt, skt = self.queue.get()
             print("----------------Levanto un socket en GET-----------")
             if (not skt):
                 self.keep_running = False
@@ -65,21 +66,23 @@ class GetWorker(multiprocessing.Process):
             print("----------------Envio response en GET-----------")
 
             skt.close()
+            self.finished_queue.put(id_skt)
 
 ''''''
 class PostWorker(multiprocessing.Process):
-    def __init__(self, queue):
+    def __init__(self, queue, finished_queue):
         ''''''
         multiprocessing.Process.__init__(self)
 
         self.queue = queue
+        self.finished_queue = finished_queue
         self.keep_running = True
 
     def run(self):
         '''Run function, it gets connected sockets from its queue and then
         writes the requested information'''
         while self.keep_running:
-            skt = self.queue.get()
+            id_skt, skt = self.queue.get()
 
             if (not skt):
                 self.keep_running = False
@@ -113,3 +116,4 @@ class PostWorker(multiprocessing.Process):
             skt.send_response(200, json.dumps({"msg": status}))
 
             skt.close()
+            self.finished_queue.put(id_skt)
