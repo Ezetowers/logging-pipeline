@@ -40,8 +40,8 @@ class DbServer(object):
         signal.pause()
 
 if __name__ == '__main__':
-    number_of_workers = 4 #int(os.environ['NUMBER_OF_THREADS'])
-    number_of_queued_connections = 10 #int(os.environ['MAX_QUEUED_CONNECTIONS'])
+    number_of_workers = int(os.environ['NUMBER_OF_WORKERS_DB'])
+    number_of_queued_connections = int(os.environ['MAX_QUEUED_CONNECTIONS_DB'])
 
     server = DbServer(number_of_workers, number_of_queued_connections)
     server.run()

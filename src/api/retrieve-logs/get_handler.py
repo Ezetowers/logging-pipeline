@@ -9,8 +9,8 @@ HOST = '0.0.0.0'
 PORT = 6070
 
 if __name__ == '__main__':
-    number_of_workers = 4 #int(os.environ['NUMBER_OF_THREADS'])
-    number_of_queued_connections = 10 #int(os.environ['MAX_QUEUED_CONNECTIONS'])
+    number_of_workers = int(os.environ['NUMBER_OF_WORKERS_GET'])
+    number_of_queued_connections = int(os.environ['MAX_QUEUED_CONNECTIONS_GET'])
 
     server = GetServer(number_of_workers, number_of_queued_connections, HOST, PORT)
     server.run()
