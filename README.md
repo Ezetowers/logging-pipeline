@@ -1,10 +1,14 @@
 # logging-pipeline
 
-Repository for the 1st project of "Sistemas Distribuidos I". It features a distributed logging pipeline that can be used by a REST API.
+Repository for the 1st project of "Sistemas Distribuidos I". It features a distributed logging pipeline that can be used by a "REST" API (see bellow).
 
 ## Installation
 
 Just download the repo and you are good to go! Docker and docker-compose required.
+
+### Configuration
+
+The number of workers and queued connections for each app can be modified in the config.env file.
 
 ## Usage
 
