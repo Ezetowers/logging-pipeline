@@ -21,14 +21,7 @@ class DbServer(object):
         self.reader = ReaderDbHandler(logs, number_of_workers, number_of_queued_connections, HOST, READER_PORT)
 
     def quit(self, sig_num, frame):
-        pid_reader = self.reader.pid
-        pid_writer = self.writer.pid
-        print("-------RECIBI EL QUIT, LOS PID SON READER: {}, HANDLER: {} y SERVER: {}----------".format(pid_reader, pid_writer, os.getpid()))
-        print("")
-        os.kill(pid_reader, signal.SIGTERM)
-        os.kill(pid_writer, signal.SIGTERM)
-        self.reader.join()
-        self.writer.join()
+        pass
 
     def run(self):
         self.reader.start()
@@ -39,9 +32,24 @@ class DbServer(object):
 
         signal.pause()
 
+        pid_reader = self.reader.pid
+        pid_writer = self.writer.pid
+        print("-------RECIBI EL QUIT, LOS PID SON READER: {}, WRITER: {} y SERVER: {}----------".format(pid_reader, pid_writer, os.getpid()))
+        print("")
+        # os.kill(pid_writer, signal.SIGTERM)
+        # os.kill(pid_reader, signal.SIGTERM)
+
+        self.reader.stop_running.set()
+        self.writer.stop_running.set()
+
+        self.reader.join()
+        self.writer.join()
+
+
+
 if __name__ == '__main__':
-    number_of_workers = int(os.environ['NUMBER_OF_WORKERS_DB'])
-    number_of_queued_connections = int(os.environ['MAX_QUEUED_CONNECTIONS_DB'])
+    number_of_workers = 4 #int(os.environ['NUMBER_OF_THREADS'])
+    number_of_queued_connections = 10 #int(os.environ['MAX_QUEUED_CONNECTIONS'])
 
     server = DbServer(number_of_workers, number_of_queued_connections)
     server.run()
